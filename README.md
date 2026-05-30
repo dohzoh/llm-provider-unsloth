@@ -2,6 +2,12 @@
 
 Pi LLM provider plugin for [Unsloth](https://github.com/unslothai/unsloth) — connect pi to locally served models via the OpenAI-compatible API.
 
+## Install
+
+```bash
+git clone https://github.com/dohzoh/llm-provider-unsloth
+```
+
 ## Quick Start
 
 ### 1. Install Unsloth
