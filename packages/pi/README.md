@@ -2,6 +2,24 @@
 
 Connects Pi to local Unsloth model serving via OpenAI-compatible API.
 
+## Installation
+
+This package is published to GitHub Packages. You need to configure authentication first:
+
+```bash
+# Configure GitHub Packages registry
+echo "@dohzoh:registry=https://npm.pkg.github.com/" >> ~/.npmrc
+echo "//npm.pkg.github.com/:_authToken=$(gh auth token)" >> ~/.npmrc
+
+# Install the package
+npm install @dohzoh/pi-unsloth
+```
+
+Or use the local path directly for development:
+```bash
+pi -e /path/to/llm-provider-unsloth/packages/pi
+```
+
 ## Usage
 
 ### 1. Start the Unsloth API server
