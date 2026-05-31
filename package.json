@@ -3,12 +3,19 @@
     "version": "0.1.0",
     "description": "Unsloth provider plugins for Pi and Opencode",
     "private": true,
+    "packageManager": "pnpm@9.15.0",
     "scripts": {
-        "build": "echo 'No build step needed - plugins loaded directly by agents'"
+        "build": "echo 'No build step needed - plugins loaded directly by agents'",
+        "test": "echo 'No tests yet'",
+        "lint": "echo 'No lint configured'",
+        "dev": "echo 'No dev server needed'"
     },
     "workspaces": [
         "packages/*"
     ],
+    "devDependencies": {
+        "turbo": "^2.4.0"
+    },
     "keywords": [
         "pi-coding-agent",
         "opencode",

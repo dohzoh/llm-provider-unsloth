@@ -7,6 +7,10 @@
   "keywords": ["pi", "unsloth", "provider", "extension", "ai", "local-llm"],
   "author": "dohzoh",
   "license": "MIT",
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://npm.pkg.github.com"
+  },
   "devDependencies": {
     "@types/node": "^20.0.0"
   }
