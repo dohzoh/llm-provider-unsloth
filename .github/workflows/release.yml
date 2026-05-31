@@ -58,12 +58,8 @@ jobs:
           node-version: '22'
           cache: 'pnpm'
 
-      - name: Configure pnpm for GitHub Packages
-        run: |
-          pnpm config set @llm-provider-unsloth:registry https://npm.pkg.github.com/
-
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+        run: pnpm install
 
       - name: Get version from tag
         id: version
@@ -73,7 +69,9 @@ jobs:
         run: pnpm --filter @llm-provider-unsloth/pi version ${{ steps.version.outputs.VERSION }} --no-git-check
 
       - name: Publish to GitHub Packages
-        run: pnpm --filter @llm-provider-unsloth/pi publish --no-git-check
+        run: |
+          echo "//npm.pkg.github.com/:_authToken=$NODE_AUTH_TOKEN" >> ~/.npmrc
+          pnpm --filter @llm-provider-unsloth/pi publish --no-git-check
         env:
           NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
@@ -98,12 +96,8 @@ jobs:
           node-version: '22'
           cache: 'pnpm'
 
-      - name: Configure pnpm for GitHub Packages
-        run: |
-          pnpm config set @llm-provider-unsloth:registry https://npm.pkg.github.com/
-
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+        run: pnpm install
 
       - name: Get version from tag
         id: version
@@ -113,6 +107,8 @@ jobs:
         run: pnpm --filter @llm-provider-unsloth/opencode version ${{ steps.version.outputs.VERSION }} --no-git-check
 
       - name: Publish to GitHub Packages
-        run: pnpm --filter @llm-provider-unsloth/opencode publish --no-git-check
+        run: |
+          echo "//npm.pkg.github.com/:_authToken=$NODE_AUTH_TOKEN" >> ~/.npmrc
+          pnpm --filter @llm-provider-unsloth/opencode publish --no-git-check
         env:
           NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
