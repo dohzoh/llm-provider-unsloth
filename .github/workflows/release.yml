@@ -3,6 +3,7 @@ name: CI/CD
 on:
   push:
     branches: [main]
+    tags: ['pi@*', 'opencode@*']
   pull_request:
     branches: [main]
   workflow_dispatch:
