@@ -40,7 +40,7 @@ jobs:
       - name: Publish to GitHub Packages
         run: |
           echo "//npm.pkg.github.com/:_authToken=$NODE_AUTH_TOKEN" >> ~/.npmrc
-          pnpm --filter @dohzoh/opencode-unsloth publish --no-git-check --access public
+          pnpm --filter @dohzoh/opencode-unsloth publish --no-git-check --access public --registry https://npm.pkg.github.com
         env:
           NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           VERSION: ${{ steps.version.outputs.VERSION }}
