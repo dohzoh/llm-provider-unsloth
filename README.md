@@ -61,7 +61,7 @@ pi -e ./packages/pi
 
 **Option B: npm package (temporary)**
 ```bash
-pi -e @dohzoh/pi
+pi -e @dohzoh/pi-unsloth
 ```
 
 **Option C: models.json (persistent)**
@@ -88,7 +88,7 @@ Add to `~/.pi/agent/models.json`:
 UNSLOTH_BASE_URL=http://localhost:9000/v1 pi -e ./packages/pi
 
 # Or via npm package
-UNSLOTH_BASE_URL=http://localhost:9000/v1 pi -e @dohzoh/pi
+UNSLOTH_BASE_URL=http://localhost:9000/v1 pi -e @dohzoh/pi-unsloth
 ```
 
 Verify: `curl http://localhost:8000/v1/models`
@@ -113,7 +113,7 @@ UNSLOTH_BASE_URL=http://localhost:9000/v1 opencode plugin ./packages/opencode
 
 **Option B: npm package (temporary)**
 ```bash
-opencode plugin @dohzoh/opencode
+opencode plugin @dohzoh/opencode-unsloth
 ```
 
 **Option C: Environment variable for custom endpoint**
@@ -122,7 +122,7 @@ opencode plugin @dohzoh/opencode
 UNSLOTH_BASE_URL=http://localhost:9000/v1 opencode plugin ./packages/opencode
 
 # Or via npm package
-UNSLOTH_BASE_URL=http://localhost:9000/v1 opencode plugin @dohzoh/opencode
+UNSLOTH_BASE_URL=http://localhost:9000/v1 opencode plugin @dohzoh/opencode-unsloth
 ```
 
 Verify: `curl http://localhost:8888/v1/models`
@@ -146,7 +146,7 @@ pi -e ./packages/pi
 
 **Via npm package:**
 ```bash
-pi -e @dohzoh/pi
+pi -e @dohzoh/pi-unsloth
 ```
 
 ### Opencode Development
@@ -158,7 +158,7 @@ opencode plugin ./packages/opencode
 
 **Via npm package:**
 ```bash
-opencode plugin @dohzoh/opencode
+opencode plugin @dohzoh/opencode-unsloth
 ```
 
 ### Testing Custom Endpoints
@@ -170,7 +170,7 @@ UNSLOTH_BASE_URL=http://localhost:9000/v1 pi -e ./packages/pi
 
 **For Pi - Via npm package:**
 ```bash
-UNSLOTH_BASE_URL=http://localhost:9000/v1 pi -e @dohzoh/pi
+UNSLOTH_BASE_URL=http://localhost:9000/v1 pi -e @dohzoh/pi-unsloth
 ```
 
 **For Opencode - Direct from repo:**
@@ -180,7 +180,7 @@ UNSLOTH_BASE_URL=http://localhost:9000/v1 opencode plugin ./packages/opencode
 
 **For Opencode - Via npm package:**
 ```bash
-UNSLOTH_BASE_URL=http://localhost:9000/v1 opencode plugin @dohzoh/opencode
+UNSLOTH_BASE_URL=http://localhost:9000/v1 opencode plugin @dohzoh/opencode-unsloth
 ```
 
 ## Configuration

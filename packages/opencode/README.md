@@ -17,9 +17,9 @@ opencode plugin /path/to/llm-provider-unsloth/packages/opencode
 Once published to npm:
 
 ```bash
-npm install @dohzoh/opencode
+npm install @dohzoh/opencode-unsloth
 # Then register with opencode
-opencode plugin @dohzoh/opencode
+opencode plugin @dohzoh/opencode-unsloth
 ```
 
 ## Usage
@@ -57,7 +57,7 @@ unsloth studio start --port 8888   # For opencode provider
 ```bash
 opencode plugin ./packages/opencode
 # Or if installed via npm:
-# opencode plugin @dohzoh/opencode
+# opencode plugin @dohzoh/opencode-unsloth
 ```
 
 ### 3. Configure the Provider in Opencode
