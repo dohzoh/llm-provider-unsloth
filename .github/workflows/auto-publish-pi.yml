@@ -30,20 +30,19 @@ jobs:
       - name: Install dependencies
         run: pnpm install
 
-      - name: Bump version
+      - name: Configure npm for GitHub Packages
         run: |
-          cd packages/pi
-          npm version patch --no-git-check
-          echo "VERSION=$(node -p "require('./package.json').version")" >> $GITHUB_OUTPUT
+          echo "@dohzoh:registry=https://npm.pkg.github.com" >> ~/.npmrc
+          echo "//npm.pkg.github.com/:_authToken=$NODE_AUTH_TOKEN" >> ~/.npmrc
+
+      - name: Get version
+        run: echo "VERSION=$(node -p "require('./packages/pi/package.json').version")" >> $GITHUB_OUTPUT
         id: version
 
       - name: Publish to GitHub Packages
         run: |
-          echo "//npm.pkg.github.com/:_authToken=$NODE_AUTH_TOKEN" >> ~/.npmrc
-          pnpm --filter @dohzoh/pi-unsloth publish --no-git-check --access public --registry https://npm.pkg.github.com
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          VERSION: ${{ steps.version.outputs.VERSION }}
+          cd packages/pi
+          npm publish --access public --no-git-check
 
       - name: Create Git Tag
         run: |

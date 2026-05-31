@@ -1,6 +1,6 @@
 {
   "name": "@dohzoh/opencode-unsloth",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Unsloth provider plugin for Opencode - connects Opencode to local Unsloth model serving",
   "main": "index.ts",
   "type": "module",
