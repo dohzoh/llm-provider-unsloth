@@ -1,12 +1,14 @@
 {
-  "name": "@earendil-works/pi-provider-unsloth",
+  "name": "llm-provider-unsloth",
   "version": "0.1.0",
-  "description": "Pi LLM provider plugin for Unsloth local model serving",
-  "type": "module",
-  "main": "index.ts",
+  "description": "Unsloth provider plugins for Pi and Opencode",
+  "private": true,
+  "workspaces": [
+    "packages/*"
+  ],
   "scripts": {
-    "build": "echo 'No build step needed - TypeScript loaded directly by pi'"
+    "build": "echo 'No build step needed - plugins loaded directly by agents'"
   },
-  "keywords": ["pi-coding-agent", "unsloth", "provider", "extension"],
+  "keywords": ["pi-coding-agent", "opencode", "unsloth", "provider", "extension"],
   "license": "MIT"
 }
