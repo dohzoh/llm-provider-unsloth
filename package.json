@@ -1,6 +1,6 @@
 {
     "name": "llm-provider-unsloth",
-    "version": "0.1.0",
+    "version": "0.1.1",
     "description": "Unsloth provider plugins for Pi and Opencode",
     "private": true,
     "packageManager": "pnpm@9.15.0",
