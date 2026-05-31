@@ -5,25 +5,31 @@
  *
  * Usage:
  *   # Start Unsloth server first (e.g., via `unsloth studio start` or the Python SDK)
- *   # Default endpoint: http://localhost:8000/v1
  *
- *   # Register this provider in pi
+ *   # Option 1: Use the interactive /unsloth-login command
  *   pi -e ./path/to/pi-provider-unsloth
+ *   /unsloth-login
  *
- * Or add to ~/.pi/agent/models.json as a custom provider:
- *   {
- *     "providers": {
- *       "unsloth": {
- *         "baseUrl": "http://localhost:8000/v1",
- *         "api": "openai-completions",
- *         "apiKey": "unsloth-remote",
- *         "models": [
- *           { "id": "<your-model-id>" }
- *         ]
- *       }
- *     }
- *   }
+ *   # Option 2: Configure via environment variable
+ *   UNSLOTH_BASE_URL=http://192.168.x.x:8000/v1 pi -e ./path/to/pi-provider-unsloth
+ *
+ *   # Option 3: Add to ~/.pi/agent/models.json as a custom provider:
+ *   # {
+ *   #   "providers": {
+ *   #     "unsloth": {
+ *   #       "baseUrl": "http://localhost:8000/v1",
+ *   #       "api": "openai-completions",
+ *   #       "apiKey": "unsloth-remote",
+ *   #       "models": [
+ *   #         { "id": "<your-model-id>" }
+ *   #       ]
+ *   #     }
+ *   #   }
+ *   # }
  */
+
+import { join } from "path";
+import { readFileSync, writeFileSync, existsSync } from "fs";
 
 // Define minimal interface for the Pi provider API we actually use
 interface PiProviderAPI {
@@ -45,9 +51,65 @@ interface PiProviderAPI {
       }>;
     }
   ) => void;
+  registerCommand: (
+    name: string,
+    opts: {
+      description: string;
+      handler: (args: string, ctx: ExtensionCommandContext) => Promise<void>;
+    }
+  ) => void;
+}
+
+// Extension context types
+interface ExtensionCommandContext {
+  ui: {
+    select: (title: string, options: string[], opts?: { timeout?: number }) => Promise<string | undefined>;
+    input: (title: string, placeholder?: string, opts?: { timeout?: number }) => Promise<string | undefined>;
+    notify: (message: string, type?: "info" | "warning" | "error") => void;
+  };
+  modelRegistry: {
+    refresh: () => void;
+  };
+  sessionManager: {
+    cwd: string;
+  };
+  cwd: string;
 }
 
 const DEFAULT_BASE_URL = "http://localhost:8000/v1";
+
+// Config file path
+function getConfigPath(cwd: string): string {
+  return join(cwd, ".pi-unsloth-config.json");
+}
+
+// Config types
+interface UnslothConfig {
+  baseUrl: string;
+  apiKey: string;
+  model?: string;
+}
+
+// Load saved config
+function loadConfig(cwd: string): UnslothConfig | null {
+  try {
+    const configPath = getConfigPath(cwd);
+    if (existsSync(configPath)) {
+      return JSON.parse(readFileSync(configPath, "utf-8"));
+    }
+  } catch {}
+  return null;
+}
+
+// Save config
+function saveConfig(cwd: string, config: UnslothConfig): void {
+  try {
+    const configPath = getConfigPath(cwd);
+    writeFileSync(configPath, JSON.stringify(config, null, 2), "utf-8");
+  } catch (e) {
+    console.error("[pi-unsloth] Failed to save config:", e);
+  }
+}
 
 // Common models that work well with Unsloth fine-tuning
 const COMMON_MODELS = [
@@ -105,8 +167,123 @@ async function discoverModels(baseUrl: string): Promise<Record<string, any>[]> {
   }
 }
 
+// Register the /unsloth-login command
+function registerUnslothLoginCommand(pi: PiProviderAPI, defaultBaseUrl: string) {
+  pi.registerCommand("unsloth-login", {
+    description: "Configure and connect to a local Unsloth server",
+    handler: async (args: string, ctx: ExtensionCommandContext) => {
+      // Parse arguments (optional: can pass baseUrl directly like /unsloth-login http://192.168.1.100:8000/v1)
+      const argBaseUrl = args.trim() || "";
+
+      // Step 1: Get base URL (from args, saved config, or ask user)
+      let baseUrl: string;
+      if (argBaseUrl) {
+        baseUrl = argBaseUrl;
+      } else {
+        const savedConfig = loadConfig(ctx.cwd);
+        if (savedConfig) {
+          // Show saved config options
+          const choice = await ctx.ui.select(
+            "Unsloth Connection",
+            [
+              `Use saved: ${savedConfig.baseUrl}`,
+              "Enter new URL",
+            ],
+            { timeout: 60000 }
+          );
+
+          if (choice === undefined) {
+            ctx.ui.notify("Cancelled", "info");
+            return;
+          }
+
+          if (choice.startsWith("Use saved:")) {
+            baseUrl = savedConfig.baseUrl;
+          } else {
+            // Ask for new URL
+            const entered = await ctx.ui.input(
+              "Unsloth Server URL",
+              savedConfig.baseUrl || defaultBaseUrl,
+              { timeout: 60000 }
+            );
+            if (entered === undefined || !entered.trim()) {
+              ctx.ui.notify("No URL entered", "warning");
+              return;
+            }
+            baseUrl = entered.trim();
+          }
+        } else {
+          // No saved config, ask user
+          const entered = await ctx.ui.input(
+            "Unsloth Server URL",
+            defaultBaseUrl,
+            { timeout: 60000 }
+          );
+          if (entered === undefined || !entered.trim()) {
+            ctx.ui.notify("No URL entered", "warning");
+            return;
+          }
+          baseUrl = entered.trim();
+        }
+      }
+
+      // Step 2: Get API key (usually "unsloth-remote" for local, but can be customized)
+      const apiKey = await ctx.ui.input(
+        "API Key",
+        "unsloth-remote",
+        { timeout: 60000 }
+      );
+      if (apiKey === undefined) {
+        ctx.ui.notify("No API key entered", "warning");
+        return;
+      }
+
+      // Step 3: Save config
+      const config: UnslothConfig = {
+        baseUrl,
+        apiKey: apiKey.trim() || "unsloth-remote",
+      };
+      saveConfig(ctx.cwd, config);
+
+      // Step 4: Discover models from the server
+      const models = await discoverModels(baseUrl);
+
+      if (models.length === 0) {
+        ctx.ui.notify(
+          `No models found at ${baseUrl}. Provider registered with defaults.`,
+          "warning"
+        );
+      } else {
+        ctx.ui.notify(
+          `Connected! Found ${models.length} model(s) at ${baseUrl}`,
+          "info"
+        );
+      }
+
+      // Step 5: Register the provider
+      pi.registerProvider("unsloth", {
+        name: "Unsloth (Local)",
+        baseUrl,
+        apiKey: config.apiKey,
+        api: "openai-completions" as const,
+        models,
+      });
+
+      // Step 6: Refresh model registry to show new models
+      ctx.modelRegistry.refresh();
+
+      console.log(`[pi-unsloth] Provider registered at ${baseUrl}`);
+      console.log(`[pi-unsloth] Available models: ${models.length}`);
+      console.log(`[pi-unsloth] Run /models to see available models`);
+    },
+  });
+}
+
 export default async function (pi: PiProviderAPI) {
   const baseUrl = process.env.UNSLOTH_BASE_URL ?? DEFAULT_BASE_URL;
+
+  // Register the /unsloth-login command
+  registerUnslothLoginCommand(pi, baseUrl);
 
   // Try to discover models from the running Unsloth server
   const discoveredModels = await discoverModels(baseUrl);
