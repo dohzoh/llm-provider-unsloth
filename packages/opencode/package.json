@@ -1,5 +1,5 @@
 {
-  "name": "@llm-provider-unsloth/opencode",
+  "name": "@dohzoh/opencode",
   "version": "0.1.0",
   "description": "Unsloth provider plugin for Opencode - connects Opencode to local Unsloth model serving",
   "main": "index.ts",

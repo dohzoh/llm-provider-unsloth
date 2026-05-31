@@ -61,7 +61,7 @@ pi -e ./packages/pi
 
 **Option B: npm package (temporary)**
 ```bash
-pi -e @llm-provider-unsloth/pi
+pi -e @dohzoh/pi
 ```
 
 **Option C: models.json (persistent)**
@@ -88,7 +88,7 @@ Add to `~/.pi/agent/models.json`:
 UNSLOTH_BASE_URL=http://localhost:9000/v1 pi -e ./packages/pi
 
 # Or via npm package
-UNSLOTH_BASE_URL=http://localhost:9000/v1 pi -e @llm-provider-unsloth/pi
+UNSLOTH_BASE_URL=http://localhost:9000/v1 pi -e @dohzoh/pi
 ```
 
 Verify: `curl http://localhost:8000/v1/models`
@@ -113,7 +113,7 @@ UNSLOTH_BASE_URL=http://localhost:9000/v1 opencode plugin ./packages/opencode
 
 **Option B: npm package (temporary)**
 ```bash
-opencode plugin @llm-provider-unsloth/opencode
+opencode plugin @dohzoh/opencode
 ```
 
 **Option C: Environment variable for custom endpoint**
@@ -122,7 +122,7 @@ opencode plugin @llm-provider-unsloth/opencode
 UNSLOTH_BASE_URL=http://localhost:9000/v1 opencode plugin ./packages/opencode
 
 # Or via npm package
-UNSLOTH_BASE_URL=http://localhost:9000/v1 opencode plugin @llm-provider-unsloth/opencode
+UNSLOTH_BASE_URL=http://localhost:9000/v1 opencode plugin @dohzoh/opencode
 ```
 
 Verify: `curl http://localhost:8888/v1/models`
@@ -146,7 +146,7 @@ pi -e ./packages/pi
 
 **Via npm package:**
 ```bash
-pi -e @llm-provider-unsloth/pi
+pi -e @dohzoh/pi
 ```
 
 ### Opencode Development
@@ -158,7 +158,7 @@ opencode plugin ./packages/opencode
 
 **Via npm package:**
 ```bash
-opencode plugin @llm-provider-unsloth/opencode
+opencode plugin @dohzoh/opencode
 ```
 
 ### Testing Custom Endpoints
@@ -170,7 +170,7 @@ UNSLOTH_BASE_URL=http://localhost:9000/v1 pi -e ./packages/pi
 
 **For Pi - Via npm package:**
 ```bash
-UNSLOTH_BASE_URL=http://localhost:9000/v1 pi -e @llm-provider-unsloth/pi
+UNSLOTH_BASE_URL=http://localhost:9000/v1 pi -e @dohzoh/pi
 ```
 
 **For Opencode - Direct from repo:**
@@ -180,7 +180,7 @@ UNSLOTH_BASE_URL=http://localhost:9000/v1 opencode plugin ./packages/opencode
 
 **For Opencode - Via npm package:**
 ```bash
-UNSLOTH_BASE_URL=http://localhost:9000/v1 opencode plugin @llm-provider-unsloth/opencode
+UNSLOTH_BASE_URL=http://localhost:9000/v1 opencode plugin @dohzoh/opencode
 ```
 
 ## Configuration

@@ -17,10 +17,10 @@ pi -e /path/to/llm-provider-unsloth/packages/pi
 Once published to npm:
 
 ```bash
-npm install @llm-provider-unsloth/pi
+npm install @dohzoh/pi
 # Then register with pi (by adding to models.json or using the CLI flag)
 # Example using CLI flag (temporary):
-pi -e @llm-provider-unsloth/pi
+pi -e @dohzoh/pi
 ```
 
 ## Usage
@@ -60,7 +60,7 @@ You can register the plugin temporarily via CLI flag:
 ```bash
 pi -e ./packages/pi
 # Or if installed via npm:
-# pi -e @llm-provider-unsloth/pi
+# pi -e @dohzoh/pi
 ```
 
 For persistent registration, add to `~/.pi/agent/models.json`:
