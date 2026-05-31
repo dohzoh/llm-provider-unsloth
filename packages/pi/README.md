@@ -2,27 +2,6 @@
 
 Connects Pi to local Unsloth model serving via OpenAI-compatible API.
 
-## Installation
-
-You can install this plugin directly from the repository or publish it to npm and install it as a dependency.
-
-### From Repository (Development)
-
-```bash
-pi -e /path/to/llm-provider-unsloth/packages/pi
-```
-
-### As an Independent npm Package
-
-Once published to npm:
-
-```bash
-npm install @dohzoh/pi-unsloth
-# Then register with pi (by adding to models.json or using the CLI flag)
-# Example using CLI flag (temporary):
-pi -e @dohzoh/pi-unsloth
-```
-
 ## Usage
 
 ### 1. Start the Unsloth API server
@@ -96,15 +75,6 @@ You can customize the Unsloth server endpoint by setting the `UNSLOTH_BASE_URL` 
 ```bash
 UNSLOTH_BASE_URL=http://localhost:9000/v1 pi -e ./packages/pi
 ```
-
-## Development
-
-To develop this plugin:
-
-1. Clone the repository
-2. Install dependencies: `pnpm install`
-3. Make changes to `index.ts`
-4. Test with: `pi -e ./packages/pi`
 
 ## Features
 
