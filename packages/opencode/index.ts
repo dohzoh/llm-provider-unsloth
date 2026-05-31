@@ -8,14 +8,34 @@
  *   # Default endpoint: http://localhost:8888/v1
  *   
  *   # Register this provider in opencode
- *   opencode --plugin ./path/to/llm-provider-unsloth/packages/opencode
+ *   opencode plugin ./path/to/llm-provider-unsloth/packages/opencode
  *   
  *   # Then configure via:
  *   /connect unsloth   # Set base_url and api_key
  *   /models            # Fetch available models
  */
 
-import type { ExtensionAPI } from "@opencode/agent"; // Adjust based on opencode's actual API
+// Define minimal interface for the Opencode provider API we actually use
+interface UnslothProviderAPI {
+  registerProvider: (
+    id: string,
+    opts: {
+      name: string;
+      baseUrl: string;
+      apiKey: string;
+      api: "openai-completions";
+      models: Array<{
+        id: string;
+        name?: string;
+        reasoning?: boolean;
+        input: readonly ["text"];
+        cost: { input: number; output: number; cacheRead: number; cacheWrite: number };
+        contextWindow: number;
+        maxTokens: number;
+      }>;
+    }
+  ) => void;
+}
 
 const DEFAULT_BASE_URL = "http://localhost:8888/v1";
 
@@ -75,7 +95,7 @@ async function discoverModels(baseUrl: string): Promise<Record<string, any>[]> {
   }
 }
 
-export default async function (opencode: ExtensionAPI) {
+export default async function (opencode: UnslothProviderAPI) {
   const baseUrl = process.env.UNSLOTH_BASE_URL ?? DEFAULT_BASE_URL;
 
   // Try to discover models from the running Unsloth server

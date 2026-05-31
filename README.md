@@ -54,12 +54,17 @@ The server exposes standard OpenAI endpoints (`/v1/chat/completions`, `/v1/model
 
 ### For Pi (Default Port: 8000)
 
-**Option A: CLI flag (temporary)**
+**Option A: CLI flag (temporary) - Direct from repo**
 ```bash
 pi -e ./packages/pi
 ```
 
-**Option B: models.json (persistent)**
+**Option B: npm package (temporary)**
+```bash
+pi -e @llm-provider-unsloth/pi
+```
+
+**Option C: models.json (persistent)**
 Add to `~/.pi/agent/models.json`:
 ```json
 {
@@ -77,9 +82,13 @@ Add to `~/.pi/agent/models.json`:
 }
 ```
 
-**Option C: Environment variable for custom endpoint**
+**Option D: Environment variable for custom endpoint**
 ```bash
+# Direct from repo
 UNSLOTH_BASE_URL=http://localhost:9000/v1 pi -e ./packages/pi
+
+# Or via npm package
+UNSLOTH_BASE_URL=http://localhost:9000/v1 pi -e @llm-provider-unsloth/pi
 ```
 
 Verify: `curl http://localhost:8000/v1/models`
@@ -97,6 +106,25 @@ opencode plugin ./packages/opencode
 UNSLOTH_BASE_URL=http://localhost:9000/v1 opencode plugin ./packages/opencode
 ```
 
+**Option B: Environment variable for custom endpoint**
+```bash
+UNSLOTH_BASE_URL=http://localhost:9000/v1 opencode plugin ./packages/opencode
+```
+
+**Option B: npm package (temporary)**
+```bash
+opencode plugin @llm-provider-unsloth/opencode
+```
+
+**Option C: Environment variable for custom endpoint**
+```bash
+# Direct from repo
+UNSLOTH_BASE_URL=http://localhost:9000/v1 opencode plugin ./packages/opencode
+
+# Or via npm package
+UNSLOTH_BASE_URL=http://localhost:9000/v1 opencode plugin @llm-provider-unsloth/opencode
+```
+
 Verify: `curl http://localhost:8888/v1/models`
 Configure: `/connect unsloth` (then set base_url and api_key)
 List models: `/models`
@@ -110,22 +138,49 @@ pnpm install
 ```
 
 ### Pi Development
+
+**Direct from repo:**
 ```bash
 pi -e ./packages/pi
 ```
 
+**Via npm package:**
+```bash
+pi -e @llm-provider-unsloth/pi
+```
+
 ### Opencode Development
+
+**Direct from repo:**
 ```bash
 opencode plugin ./packages/opencode
 ```
 
-### Testing Custom Endpoints
+**Via npm package:**
 ```bash
-# For Pi
-UNSLOTH_BASE_URL=http://localhost:9000/v1 pi -e ./packages/pi
+opencode plugin @llm-provider-unsloth/opencode
+```
 
-# For Opencode  
+### Testing Custom Endpoints
+
+**For Pi - Direct from repo:**
+```bash
+UNSLOTH_BASE_URL=http://localhost:9000/v1 pi -e ./packages/pi
+```
+
+**For Pi - Via npm package:**
+```bash
+UNSLOTH_BASE_URL=http://localhost:9000/v1 pi -e @llm-provider-unsloth/pi
+```
+
+**For Opencode - Direct from repo:**
+```bash
 UNSLOTH_BASE_URL=http://localhost:9000/v1 opencode plugin ./packages/opencode
+```
+
+**For Opencode - Via npm package:**
+```bash
+UNSLOTH_BASE_URL=http://localhost:9000/v1 opencode plugin @llm-provider-unsloth/opencode
 ```
 
 ## Configuration

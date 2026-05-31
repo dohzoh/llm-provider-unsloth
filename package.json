@@ -1,11 +1,20 @@
 {
-  "name": "llm-provider-unsloth",
-  "version": "0.1.0",
-  "description": "Unsloth provider plugins for Pi and Opencode",
-  "private": true,
-  "scripts": {
-    "build": "echo 'No build step needed - plugins loaded directly by agents'"
-  },
-  "keywords": ["pi-coding-agent", "opencode", "unsloth", "provider", "extension"],
-  "license": "MIT"
+    "name": "llm-provider-unsloth",
+    "version": "0.1.0",
+    "description": "Unsloth provider plugins for Pi and Opencode",
+    "private": true,
+    "scripts": {
+        "build": "echo 'No build step needed - plugins loaded directly by agents'"
+    },
+    "workspaces": [
+        "packages/*"
+    ],
+    "keywords": [
+        "pi-coding-agent",
+        "opencode",
+        "unsloth",
+        "provider",
+        "extension"
+    ],
+    "license": "MIT"
 }

@@ -1,0 +1,13 @@
+{
+  "name": "@llm-provider-unsloth/pi",
+  "version": "0.1.0",
+  "description": "Unsloth provider plugin for Pi - connects Pi to local Unsloth model serving",
+  "main": "index.ts",
+  "type": "module",
+  "keywords": ["pi", "unsloth", "provider", "extension", "ai", "local-llm"],
+  "author": "dohzoh",
+  "license": "MIT",
+  "devDependencies": {
+    "@types/node": "^20.0.0"
+  }
+}

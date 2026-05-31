@@ -25,7 +25,27 @@
  *   }
  */
 
-import type { ExtensionAPI } from "@earendil-works/pi-coding-agent";
+// Define minimal interface for the Pi provider API we actually use
+interface PiProviderAPI {
+  registerProvider: (
+    id: string,
+    opts: {
+      name: string;
+      baseUrl: string;
+      apiKey: string;
+      api: "openai-completions";
+      models: Array<{
+        id: string;
+        name?: string;
+        reasoning?: boolean;
+        input: readonly ["text"];
+        cost: { input: number; output: number; cacheRead: number; cacheWrite: number };
+        contextWindow: number;
+        maxTokens: number;
+      }>;
+    }
+  ) => void;
+}
 
 const DEFAULT_BASE_URL = "http://localhost:8000/v1";
 
@@ -85,7 +105,7 @@ async function discoverModels(baseUrl: string): Promise<Record<string, any>[]> {
   }
 }
 
-export default async function (pi: ExtensionAPI) {
+export default async function (pi: PiProviderAPI) {
   const baseUrl = process.env.UNSLOTH_BASE_URL ?? DEFAULT_BASE_URL;
 
   // Try to discover models from the running Unsloth server
