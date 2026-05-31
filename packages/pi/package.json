@@ -7,9 +7,6 @@
   "keywords": ["pi", "unsloth", "provider", "extension", "ai", "local-llm"],
   "author": "dohzoh",
   "license": "MIT",
-  "dependencies": {
-    "@earendil-works/pi-coding-agent": "file:../../../../node_modules/@earendil-works/pi-coding-agent"
-  },
   "devDependencies": {
     "@types/node": "^20.0.0"
   }
