@@ -56,8 +56,11 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '22'
-          registry-url: 'https://npm.pkg.github.com'
           cache: 'pnpm'
+
+      - name: Configure pnpm for GitHub Packages
+        run: |
+          pnpm config set @llm-provider-unsloth:registry https://npm.pkg.github.com/
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
@@ -93,8 +96,11 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '22'
-          registry-url: 'https://npm.pkg.github.com'
           cache: 'pnpm'
+
+      - name: Configure pnpm for GitHub Packages
+        run: |
+          pnpm config set @llm-provider-unsloth:registry https://npm.pkg.github.com/
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
