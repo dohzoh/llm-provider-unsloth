@@ -1,6 +1,6 @@
 {
   "name": "@dohzoh/pi-unsloth",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "description": "Unsloth provider plugin for Pi - connects Pi to local Unsloth model serving",
   "main": "index.ts",
   "type": "module",
