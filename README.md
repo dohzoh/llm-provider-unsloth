@@ -1,12 +1,18 @@
-# pi-provider-unsloth
+# llm-provider-unsloth
 
-Pi LLM provider plugin for [Unsloth](https://github.com/unslothai/unsloth) — connect pi to locally served models via the OpenAI-compatible API.
+Unsloth provider plugins for [Pi](https://pi.chat) and [Opencode](https://opencode.sh) — connect to locally served models via the OpenAI-compatible API.
 
 ## Install
 
 ```bash
 git clone https://github.com/dohzoh/llm-provider-unsloth
 ```
+
+## Project Structure
+
+This repository contains two provider plugins using pnpm workspaces:
+- **Pi provider**: `packages/pi/index.ts` (default port 8000)
+- **Opencode provider**: `packages/opencode/index.ts` (default port 8888)
 
 ## Quick Start
 
@@ -38,23 +44,23 @@ model.save_pretrained_merged("output/qwen2.5-7b")
 tokenizer.save_pretrained_merged("output/qwen2.5-7b")
 
 # Or use Unsloth Studio CLI:
-# unsloth studio start
+# unsloth studio start --port 8000   # For pi provider
+# unsloth studio start --port 8888   # For opencode provider
 ```
 
-The server exposes `http://localhost:8000/v1` by default with standard OpenAI endpoints (`/v1/chat/completions`, `/v1/models`).
+The server exposes standard OpenAI endpoints (`/v1/chat/completions`, `/v1/models`).
 
-### 3. Register the provider in pi
+## Usage
+
+### For Pi (Default Port: 8000)
 
 **Option A: CLI flag (temporary)**
-
 ```bash
-pi -e ./path/to/pi-provider-unsloth
+pi -e ./packages/pi
 ```
 
 **Option B: models.json (persistent)**
-
 Add to `~/.pi/agent/models.json`:
-
 ```json
 {
   "providers": {
@@ -72,30 +78,70 @@ Add to `~/.pi/agent/models.json`:
 ```
 
 **Option C: Environment variable for custom endpoint**
-
 ```bash
-UNSLOTH_BASE_URL=http://localhost:9000/v1 pi -e ./path/to/pi-provider-unsloth
+UNSLOTH_BASE_URL=http://localhost:9000/v1 pi -e ./packages/pi
 ```
 
-### 4. Select the model
+Verify: `curl http://localhost:8000/v1/models`
+Select model: `/model unsloth`
 
+### For Opencode (Default Port: 8888)
+
+**Option A: CLI flag (temporary)**
+```bash
+opencode --plugin ./packages/opencode
 ```
-/model unsloth   # Then pick from available models
+
+**Option B: Environment variable for custom endpoint**
+```bash
+UNSLOTH_BASE_URL=http://localhost:9000/v1 opencode --plugin ./packages/opencode
+```
+
+Verify: `curl http://localhost:8888/v1/models`
+Configure: `/connect unsloth` (then set base_url and api_key)
+List models: `/models`
+Select model: `/model unsloth`
+
+## Development
+
+Install dependencies:
+```bash
+pnpm install
+```
+
+### Pi Development
+```bash
+pi -e ./packages/pi
+```
+
+### Opencode Development
+```bash
+opencode --plugin ./packages/opencode
+```
+
+### Testing Custom Endpoints
+```bash
+# For Pi
+UNSLOTH_BASE_URL=http://localhost:9000/v1 pi -e ./packages/pi
+
+# For Opencode  
+UNSLOTH_BASE_URL=http://localhost:9000/v1 opencode --plugin ./packages/opencode
 ```
 
 ## Configuration
 
-| Option | Default | Description |
-|--------|---------|-------------|
-| `UNSLOTH_BASE_URL` | `http://localhost:8000/v1` | Unsloth server endpoint |
-| Context Window | 131072 tokens | Configurable per model |
-| Max Output Tokens | 8192 | Configurable per model |
+| Option | Default (Pi) | Default (Opencode) | Description |
+|--------|--------------|-------------------|-------------|
+| `UNSLOTH_BASE_URL` | `http://localhost:8000/v1` | `http://localhost:8888/v1` | Unsloth server endpoint |
+| Context Window | 131072 tokens | 131072 tokens | Configurable per model |
+| Max Output Tokens | 8192 | 8192 | Configurable per model |
 
 ## Features
 
 - **Auto-discovery**: Dynamically fetches models from the running Unsloth server via `/v1/models`
 - **Fallback models**: Pre-configured common models (Qwen, Llama, Gemma, Mistral) when server is not running
 - **Zero auth needed**: Local servers don't require API keys — uses `unsloth-remote` as placeholder
+- **Workspace managed**: Uses pnpm for dependency management
 
 ## Troubleshooting
 
@@ -104,18 +150,21 @@ UNSLOTH_BASE_URL=http://localhost:9000/v1 pi -e ./path/to/pi-provider-unsloth
 The Unsloth server isn't running. Start it first:
 
 ```bash
-# Via unsloth CLI
-unsloth studio start
+# Via unsloth CLI (adjust port as needed)
+unsloth studio start --port 8000   # For pi
+unsloth studio start --port 8888   # For opencode
 
 # Or via Python SDK
 python -c "from unsloth import FastLanguageModel; ..." # with model serving enabled
 ```
 
-### Model not appearing in `/model`
+### Model not appearing in `/model` or `/models`
 
-1. Check the Unsloth server is responding: `curl http://localhost:8000/v1/models`
+1. Check the Unsloth server is responding: `curl http://localhost:[PORT]/v1/models`
 2. Verify the model ID matches exactly what the server reports
-3. Reload pi's provider list: `/reload` in pi, or edit `models.json` directly
+3. Reload the provider list:
+   - Pi: `/reload` in pi, or edit `~/.pi/agent/models.json`
+   - Opencode: Reconnect provider or restart opencode
 
 ### Using GGUF models
 
@@ -128,7 +177,7 @@ model, tokenizer = FastLanguageModel.from_pretrained(
 )
 ```
 
-Register the GGUF model's ID in `models.json` under the `unsloth` provider.
+Register the GGUF model's ID in your provider's `models.json` configuration.
 
 ## License
 
