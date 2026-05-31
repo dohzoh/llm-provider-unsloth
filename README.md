@@ -89,12 +89,12 @@ Select model: `/model unsloth`
 
 **Option A: CLI flag (temporary)**
 ```bash
-opencode --plugin ./packages/opencode
+opencode plugin ./packages/opencode
 ```
 
 **Option B: Environment variable for custom endpoint**
 ```bash
-UNSLOTH_BASE_URL=http://localhost:9000/v1 opencode --plugin ./packages/opencode
+UNSLOTH_BASE_URL=http://localhost:9000/v1 opencode plugin ./packages/opencode
 ```
 
 Verify: `curl http://localhost:8888/v1/models`
@@ -116,7 +116,7 @@ pi -e ./packages/pi
 
 ### Opencode Development
 ```bash
-opencode --plugin ./packages/opencode
+opencode plugin ./packages/opencode
 ```
 
 ### Testing Custom Endpoints
@@ -125,7 +125,7 @@ opencode --plugin ./packages/opencode
 UNSLOTH_BASE_URL=http://localhost:9000/v1 pi -e ./packages/pi
 
 # For Opencode  
-UNSLOTH_BASE_URL=http://localhost:9000/v1 opencode --plugin ./packages/opencode
+UNSLOTH_BASE_URL=http://localhost:9000/v1 opencode plugin ./packages/opencode
 ```
 
 ## Configuration
