@@ -83,9 +83,13 @@ function createModelConfig(modelId: string, displayName?: string) {
 }
 
 // Dynamically discover models from the Unsloth server
-async function discoverModels(baseUrl: string): Promise<Record<string, any>[]> {
+async function discoverModels(baseUrl: string, apiKey?: string): Promise<Record<string, any>[]> {
   try {
-    const response = await fetch(`${baseUrl}/models`);
+    const headers: Record<string, string> = {};
+    if (apiKey) {
+      headers["Authorization"] = `Bearer ${apiKey}`;
+    }
+    const response = await fetch(`${baseUrl}/models`, { headers });
     if (!response.ok) return [];
     const data = (await response.json()) as { data?: Array<{ id: string }> };
     if (!data.data || !Array.isArray(data.data)) return [];
@@ -99,7 +103,8 @@ export default async function (opencode: UnslothProviderAPI) {
   const baseUrl = process.env.UNSLOTH_BASE_URL ?? DEFAULT_BASE_URL;
 
   // Try to discover models from the running Unsloth server
-  const discoveredModels = await discoverModels(baseUrl);
+  const apiKey = process.env.UNSLOTH_API_KEY || "unsloth-remote";
+  const discoveredModels = await discoverModels(baseUrl, apiKey);
 
   // Use discovered models if available, otherwise fall back to common models
   const models = discoveredModels.length > 0 

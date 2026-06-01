@@ -17,34 +17,17 @@ npm install @dohzoh/pi-unsloth
 
 Or use the local path directly for development:
 ```bash
-pi -e /path/to/llm-provider-unsloth/packages/pi
+git clone https://github.com/dohzoh/llm-provider-unsloth.git
+pi -e ./llm-provider-unsloth/packages/pi
 ```
 
 ## Usage
 
 ### 1. Start the Unsloth API server
 
-You need to have an Unsloth server running. By default, the plugin expects it on port 8000.
+You need to have an Unsloth server running. By default, the plugin expects it on port 8888.
 
-Using the Python SDK:
-
-```python
-from unsloth import FastLanguageModel
-
-model, tokenizer = FastLanguageModel.from_pretrained(
-    model_name="Qwen/Qwen2.5-7B-Instruct",
-    max_seq_length=8192,
-    load_in_4bit=True,
-)
-
-FastLanguageModel.for_inference(model)
-
-# Start the OpenAI-compatible server on port 8000
-# Note: The exact method to start the server may vary based on your Unsloth setup.
-# Refer to Unsloth documentation for serving models.
-```
-
-Or use Unsloth Studio CLI:
+use Unsloth Studio CLI:
 
 ```bash
 unsloth studio start --port 8000   # For pi provider

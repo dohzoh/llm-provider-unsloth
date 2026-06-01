@@ -101,13 +101,74 @@ function loadConfig(cwd: string): UnslothConfig | null {
   return null;
 }
 
+// Ensure baseUrl ends with /v1
+function normalizeBaseUrl(url: string): string {
+  const trimmed = url.trim();
+  if (trimmed.endsWith("/v1")) return trimmed;
+  if (trimmed.endsWith("/v1/")) return trimmed.slice(0, -1);
+  return `${trimmed}/v1`;
+}
+
 // Save config
 function saveConfig(cwd: string, config: UnslothConfig): void {
   try {
     const configPath = getConfigPath(cwd);
+    // Normalize baseUrl to always include /v1
+    config.baseUrl = normalizeBaseUrl(config.baseUrl);
     writeFileSync(configPath, JSON.stringify(config, null, 2), "utf-8");
   } catch (e) {
     console.error("[pi-unsloth] Failed to save config:", e);
+  }
+}
+
+// Pi agent models.json path
+function getPiModelsPath(): string {
+  const home = process.env.HOME || process.env.USERPROFILE || "/";
+  return join(home, ".pi", "agent", "models.json");
+}
+
+// Load existing Pi models.json or create empty structure
+function loadPiModels(): Record<string, any> {
+  try {
+    const modelsPath = getPiModelsPath();
+    if (existsSync(modelsPath)) {
+      const content = readFileSync(modelsPath, "utf-8");
+      // Remove JSON comments (lines starting with //)
+      const cleaned = content.replace(/^\s*\/\/.*$/gm, "");
+      return JSON.parse(cleaned);
+    }
+  } catch {}
+  return { providers: {} };
+}
+
+// Save provider config to ~/.pi/agent/models.json
+function saveProviderToPiModels(config: UnslothConfig, models: Array<{ id: string; name?: string }>): void {
+  try {
+    const modelsPath = getPiModelsPath();
+    const piModels = loadPiModels();
+    
+    // Ensure providers object exists
+    if (!piModels.providers) {
+      piModels.providers = {};
+    }
+    
+    // Set the unsloth provider
+    piModels.providers.unsloth = {
+      name: "Unsloth (Local)",
+      baseUrl: config.baseUrl,
+      api: "openai-completions",
+      apiKey: config.apiKey,
+      models: models.map(m => ({
+        id: m.id,
+        name: m.name || m.id.split("/").pop() || m.id
+      }))
+    };
+    
+    // Write back with formatting
+    writeFileSync(modelsPath, JSON.stringify(piModels, null, 2), "utf-8");
+    console.log(`[pi-unsloth] Saved provider config to ${modelsPath}`);
+  } catch (e) {
+    console.error("[pi-unsloth] Failed to save to models.json:", e);
   }
 }
 
@@ -155,9 +216,13 @@ function createModelConfig(modelId: string, displayName?: string) {
 }
 
 // Dynamically discover models from the Unsloth server
-async function discoverModels(baseUrl: string): Promise<Record<string, any>[]> {
+async function discoverModels(baseUrl: string, apiKey?: string): Promise<Record<string, any>[]> {
   try {
-    const response = await fetch(`${baseUrl}/models`);
+    const headers: Record<string, string> = {};
+    if (apiKey) {
+      headers["Authorization"] = `Bearer ${apiKey}`;
+    }
+    const response = await fetch(`${baseUrl}/models`, { headers });
     if (!response.ok) return [];
     const data = (await response.json()) as { data?: Array<{ id: string }> };
     if (!data.data || !Array.isArray(data.data)) return [];
@@ -242,7 +307,7 @@ function registerUnslothLoginCommand(pi: PiProviderAPI, defaultBaseUrl: string) 
       saveConfig(ctx.cwd, config);
 
       // Step 4: Discover models from the server
-      const discoveredModels = await discoverModels(baseUrl);
+      const discoveredModels = await discoverModels(baseUrl, config.apiKey);
       const models = discoveredModels.length > 0 ? discoveredModels : COMMON_MODELS.map((m) => createModelConfig(m.id, m.name));
 
       if (discoveredModels.length === 0) {
@@ -257,7 +322,7 @@ function registerUnslothLoginCommand(pi: PiProviderAPI, defaultBaseUrl: string) 
         );
       }
 
-      // Step 5: Register the provider
+      // Step 5: Register the provider in-memory
       pi.registerProvider("unsloth", {
         name: "Unsloth (Local)",
         baseUrl,
@@ -266,9 +331,16 @@ function registerUnslothLoginCommand(pi: PiProviderAPI, defaultBaseUrl: string) 
         models,
       });
 
-      // Step 6: Refresh model registry to show new models
+      // Step 6: Persist to ~/.pi/agent/models.json
+      saveProviderToPiModels(config, models);
+
+      // Step 7: Refresh model registry to show new models
       ctx.modelRegistry.refresh();
 
+      ctx.ui.notify(
+        `Registered ${models.length} model(s). Restart pi or run /models to see them.`,
+        "info"
+      );
       console.log(`[pi-unsloth] Provider registered at ${baseUrl}`);
       console.log(`[pi-unsloth] Available models: ${models.length}`);
       console.log(`[pi-unsloth] Run /models to see available models`);
@@ -279,23 +351,28 @@ function registerUnslothLoginCommand(pi: PiProviderAPI, defaultBaseUrl: string) 
 export default async function (pi: PiProviderAPI) {
   const baseUrl = process.env.UNSLOTH_BASE_URL ?? DEFAULT_BASE_URL;
 
-  // Register the /unsloth-login command
+  // Register the /login-unsloth command
   registerUnslothLoginCommand(pi, baseUrl);
 
+  // Check if we have saved config in models.json
+  const savedConfig = loadConfig(process.cwd());
+  const effectiveBaseUrl = savedConfig?.baseUrl || baseUrl;
+  const effectiveApiKey = savedConfig?.apiKey || "unsloth-remote";
+
   // Try to discover models from the running Unsloth server
-  const discoveredModels = await discoverModels(baseUrl);
+  const discoveredModels = await discoverModels(effectiveBaseUrl, effectiveApiKey);
 
   // Use discovered models if available, otherwise fall back to common models
   const models = discoveredModels.length > 0 ? discoveredModels : COMMON_MODELS.map((m) => createModelConfig(m.id, m.name));
 
   pi.registerProvider("unsloth", {
     name: "Unsloth (Local)",
-    baseUrl,
-    apiKey: "unsloth-remote", // Local server doesn't need a real API key
+    baseUrl: effectiveBaseUrl,
+    apiKey: effectiveApiKey,
     api: "openai-completions" as const,
     models,
   });
 
-  console.log(`[pi-unsloth] Provider registered at ${baseUrl}`);
+  console.log(`[pi-unsloth] Provider registered at ${effectiveBaseUrl}`);
   console.log(`[pi-unsloth] Available models: ${models.length}`);
 }
