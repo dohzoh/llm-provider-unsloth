@@ -18,22 +18,15 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v4
-
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '22'
-          cache: 'pnpm'
+          registry-url: 'https://npm.pkg.github.com'
+          scope: '@dohzoh'
 
       - name: Install dependencies
-        run: pnpm install
-
-      - name: Configure npm authentication
-        run: |
-          echo "@dohzoh:registry=https://npm.pkg.github.com" >> ~/.npmrc
-          echo "//npm.pkg.github.com/:_authToken=$NODE_AUTH_TOKEN" >> ~/.npmrc
+        run: npm install
 
       - name: Get version
         run: echo "VERSION=$(node -p "require('./packages/pi/package.json').version")" >> $GITHUB_OUTPUT
@@ -50,5 +43,3 @@ jobs:
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git tag -a pi@${{ steps.version.outputs.VERSION }} -m "pi provider ${{ steps.version.outputs.VERSION }}"
           git push origin pi@${{ steps.version.outputs.VERSION }}
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
