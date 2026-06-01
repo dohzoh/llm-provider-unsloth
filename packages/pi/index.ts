@@ -6,18 +6,18 @@
  * Usage:
  *   # Start Unsloth server first (e.g., via `unsloth studio start` or the Python SDK)
  *
- *   # Option 1: Use the interactive /unsloth-login command
+ *   # Option 1: Use the interactive /login-unsloth command
  *   pi -e ./path/to/pi-provider-unsloth
- *   /unsloth-login
+ *   /login-unsloth
  *
  *   # Option 2: Configure via environment variable
- *   UNSLOTH_BASE_URL=http://192.168.x.x:8000/v1 pi -e ./path/to/pi-provider-unsloth
+ *   UNSLOTH_BASE_URL=http://192.168.x.x:8888/v1 pi -e ./path/to/pi-provider-unsloth
  *
  *   # Option 3: Add to ~/.pi/agent/models.json as a custom provider:
  *   # {
  *   #   "providers": {
  *   #     "unsloth": {
- *   #       "baseUrl": "http://localhost:8000/v1",
+ *   #       "baseUrl": "http://localhost:8888/v1",
  *   #       "api": "openai-completions",
  *   #       "apiKey": "unsloth-remote",
  *   #       "models": [
@@ -76,7 +76,7 @@ interface ExtensionCommandContext {
   cwd: string;
 }
 
-const DEFAULT_BASE_URL = "http://localhost:8000/v1";
+const DEFAULT_BASE_URL = "http://localhost:8888/v1";
 
 // Config file path
 function getConfigPath(cwd: string): string {
@@ -169,7 +169,7 @@ async function discoverModels(baseUrl: string): Promise<Record<string, any>[]> {
 
 // Register the /unsloth-login command
 function registerUnslothLoginCommand(pi: PiProviderAPI, defaultBaseUrl: string) {
-  pi.registerCommand("unsloth-login", {
+  pi.registerCommand("login-unsloth", {
     description: "Configure and connect to a local Unsloth server",
     handler: async (args: string, ctx: ExtensionCommandContext) => {
       // Parse arguments (optional: can pass baseUrl directly like /unsloth-login http://192.168.1.100:8000/v1)
@@ -188,8 +188,7 @@ function registerUnslothLoginCommand(pi: PiProviderAPI, defaultBaseUrl: string) 
             [
               `Use saved: ${savedConfig.baseUrl}`,
               "Enter new URL",
-            ],
-            { timeout: 60000 }
+            ]
           );
 
           if (choice === undefined) {
@@ -203,8 +202,7 @@ function registerUnslothLoginCommand(pi: PiProviderAPI, defaultBaseUrl: string) 
             // Ask for new URL
             const entered = await ctx.ui.input(
               "Unsloth Server URL",
-              savedConfig.baseUrl || defaultBaseUrl,
-              { timeout: 60000 }
+              savedConfig.baseUrl || defaultBaseUrl
             );
             if (entered === undefined || !entered.trim()) {
               ctx.ui.notify("No URL entered", "warning");
@@ -216,8 +214,7 @@ function registerUnslothLoginCommand(pi: PiProviderAPI, defaultBaseUrl: string) 
           // No saved config, ask user
           const entered = await ctx.ui.input(
             "Unsloth Server URL",
-            defaultBaseUrl,
-            { timeout: 60000 }
+            defaultBaseUrl
           );
           if (entered === undefined || !entered.trim()) {
             ctx.ui.notify("No URL entered", "warning");
@@ -230,8 +227,7 @@ function registerUnslothLoginCommand(pi: PiProviderAPI, defaultBaseUrl: string) 
       // Step 2: Get API key (usually "unsloth-remote" for local, but can be customized)
       const apiKey = await ctx.ui.input(
         "API Key",
-        "unsloth-remote",
-        { timeout: 60000 }
+        "unsloth-remote"
       );
       if (apiKey === undefined) {
         ctx.ui.notify("No API key entered", "warning");
@@ -246,16 +242,17 @@ function registerUnslothLoginCommand(pi: PiProviderAPI, defaultBaseUrl: string) 
       saveConfig(ctx.cwd, config);
 
       // Step 4: Discover models from the server
-      const models = await discoverModels(baseUrl);
+      const discoveredModels = await discoverModels(baseUrl);
+      const models = discoveredModels.length > 0 ? discoveredModels : COMMON_MODELS.map((m) => createModelConfig(m.id, m.name));
 
-      if (models.length === 0) {
+      if (discoveredModels.length === 0) {
         ctx.ui.notify(
-          `No models found at ${baseUrl}. Provider registered with defaults.`,
+          `No models found at ${baseUrl}. Using common models.`,
           "warning"
         );
       } else {
         ctx.ui.notify(
-          `Connected! Found ${models.length} model(s) at ${baseUrl}`,
+          `Connected! Found ${discoveredModels.length} model(s) at ${baseUrl}`,
           "info"
         );
       }
