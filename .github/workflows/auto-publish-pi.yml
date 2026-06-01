@@ -22,11 +22,6 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '22'
-          registry-url: 'https://npm.pkg.github.com'
-          scope: '@dohzoh'
-
-      - name: Install dependencies
-        run: npm install
 
       - name: Get version
         run: echo "VERSION=$(node -p "require('./packages/pi/package.json').version")" >> $GITHUB_OUTPUT
@@ -35,7 +30,11 @@ jobs:
       - name: Publish to GitHub Packages
         run: |
           cd packages/pi
+          echo "@dohzoh:registry=https://npm.pkg.github.com" >> ~/.npmrc
+          echo "//npm.pkg.github.com/:_authToken=${NODE_AUTH_TOKEN}" >> ~/.npmrc
           npm publish --access public --no-git-check
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Create Git Tag
         run: |
