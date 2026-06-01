@@ -1,4 +1,4 @@
-name: Auto Publish Pi
+name: Release Pi
 
 on:
   push:
@@ -11,56 +11,32 @@ permissions:
   packages: write
 
 jobs:
-  publish:
-    name: Publish @dohzoh/pi-unsloth
+  release:
+    name: Release @dohzoh/pi-unsloth
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '22'
 
-      - name: Get version
-        run: echo "VERSION=$(node -p "require('./packages/pi/package.json').version")" >> $GITHUB_OUTPUT
-        id: version
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
 
-      - name: Configure npm for GitHub Packages
-        run: |
-          echo "@dohzoh:registry=https://npm.pkg.github.com" >> ~/.npmrc
-          echo "//npm.pkg.github.com/:_authToken=${NODE_AUTH_TOKEN}" >> ~/.npmrc
+      - name: Install dependencies
+        run: pnpm install
+
+      - name: Release
         env:
-          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Debug npm config
-        run: |
-          echo "=== .npmrc contents ==="
-          cat ~/.npmrc
-          echo ""
-          echo "=== npm config ==="
-          npm config list
-          echo ""
-          echo "=== npm whoami (should show github-actions[bot]) ==="
-          npm whoami --registry https://npm.pkg.github.com || echo "whoami failed"
-
-      - name: Create tarball
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NPM_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_NPM_REGISTRY: https://npm.pkg.github.com
         run: |
           cd packages/pi
-          npm pack
-
-      - name: Publish to GitHub Packages
-        run: |
-          cd packages/pi
-          echo "=== Publishing ==="
-          npm publish --access public --no-git-check --registry https://npm.pkg.github.com
-          echo "=== Publish complete ==="
-
-      - name: Create Git Tag
-        if: success()
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-          git tag -a pi@${{ steps.version.outputs.VERSION }} -m "pi provider ${{ steps.version.outputs.VERSION }}"
-          git push origin pi@${{ steps.version.outputs.VERSION }}
+          npx semantic-release
