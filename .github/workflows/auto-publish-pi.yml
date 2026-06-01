@@ -27,16 +27,38 @@ jobs:
         run: echo "VERSION=$(node -p "require('./packages/pi/package.json').version")" >> $GITHUB_OUTPUT
         id: version
 
-      - name: Publish to GitHub Packages
+      - name: Configure npm for GitHub Packages
         run: |
-          cd packages/pi
           echo "@dohzoh:registry=https://npm.pkg.github.com" >> ~/.npmrc
           echo "//npm.pkg.github.com/:_authToken=${NODE_AUTH_TOKEN}" >> ~/.npmrc
-          npm publish --access public --no-git-check
         env:
           NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Debug npm config
+        run: |
+          echo "=== .npmrc contents ==="
+          cat ~/.npmrc
+          echo ""
+          echo "=== npm config ==="
+          npm config list
+          echo ""
+          echo "=== npm whoami (should show github-actions[bot]) ==="
+          npm whoami --registry https://npm.pkg.github.com || echo "whoami failed"
+
+      - name: Create tarball
+        run: |
+          cd packages/pi
+          npm pack
+
+      - name: Publish to GitHub Packages
+        run: |
+          cd packages/pi
+          echo "=== Publishing ==="
+          npm publish --access public --no-git-check --registry https://npm.pkg.github.com
+          echo "=== Publish complete ==="
+
       - name: Create Git Tag
+        if: success()
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
